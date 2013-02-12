@@ -37,21 +37,17 @@ class Scanner:
 
 		#with open('filepathname', 'rb') as self.file:
 
-
-		# line_number = 0
-		# current_line = ''
-		# while current_line:
-		# 	hit_checker.line_check(current_line)
-		# 	line_number+++
-
 	def get_results(self):
 		"""Print hits or empty string"""
-		print "Your results are:"
-		if hit_tracker.hits:
-			total_hits = len(hit_tracker.hits)
-			print "You have %s hits:/n"%total_hits
-			for key, value in hit_tracker.hits.items():
-				print key, value
+		print "\n----Results----"
+		if self.t.hits:
+			total_hits = len(self.t.hits)
+			print "Search term: %s"%self.search_term
+			print "Total hits: %s"%total_hits
+			
+			for key, value in self.t.hits.items():
+				# print key, value
+				print "    Line {0}: '{1}'".format(key,value)
 		else: 
 			print " '%s' does not appear in the document" %search_term
 
@@ -64,11 +60,8 @@ class HitTracker:
 	def line_check(self,string,search_term,line_number):
 		"""Takes in a string, adds it to the list of hits """
 		words = string.split()
-		# print words
 		if search_term in words:
-			self.hits[line_number] = string
-			print 'The word was present'
-
+			self.hits[line_number] = string.rstrip('\n')
 
 
 
@@ -83,5 +76,5 @@ if __name__ == '__main__':
 		search_term = raw_input("Search term:")
 		s = Scanner(file_name,search_term)
 		s.traverse_file()
-		s.get_results
+		s.get_results()
 
