@@ -1,15 +1,9 @@
-#Arguments: text file to be searched
-#I/O: requests a search term
-#Output: <True> Line Number and full line, if present; 
-#Else, prints "The term <term> does not appear in the document"
-
-# from stringplus import *
 import sys
+import os
+
 """
 CLASSES: 
-	- Scanner: moves through the file, maintaining a hit list
-	- MatchChecker: checks whether a match is found in an input sequence
-
+	- Scanner: moves through the file, maintaining a dictionary of line numbers and lines where the word appears
 """
 
 class Scanner:
@@ -24,15 +18,16 @@ class Scanner:
 		"""Create an instance of a scanner with an empty list of hits"""
 		self.search_term = search_term
 		self.file = open(file_name,'rb') #opens the file in binary mode
-		self.t = HitTracker()
+		self.hits = {}
 
 
-	def traverse_file(self):
-		"""Move through a file, from beginning to end, checking for hits"""
+	def naive_traversal(self,fn):
+		"""Move through a file line by line, performing whatever function is in the argument"""
 		
 		line_number = 1
 		for line in self.file:
-			self.t.line_check(line,self.search_term,line_number)
+			# self.t.fn(*args)
+			fn(line=line,line_number=line_number,search_term = self.search_term)
 			line_number = line_number + 1
 
 		#with open('filepathname', 'rb') as self.file:
@@ -40,41 +35,41 @@ class Scanner:
 	def get_results(self):
 		"""Print hits or empty string"""
 		print "\n----Results----"
-		if self.t.hits:
-			total_hits = len(self.t.hits)
+
+		if self.hits:
+			total_hits = len(self.hits)
 			print "Search term: %s"%self.search_term
 			print "Total hits: %s"%total_hits
 			
-			for key, value in self.t.hits.items():
-				# print key, value
-				print "    Line {0}: '{1}'".format(key,value)
+			for key, value in self.hits.items():
+				print "    Line {0}: '{1}'".format(key,value)# print key, value
 		else: 
 			print " '%s' does not appear in the document" %search_term
 
+	def line_check(self,line=None,search_term=None,line_number=None):
+		"""Takes in a string, adds it to the list of hits """
+		words = line.split()
+		if search_term in words:
+			self.hits[line_number] = line.rstrip('\n')
 
-class HitTracker:
+
+class InverseIndex:
 
 	def __init__(self):
-		self.hits = {}
+		self.index = {}	
 
-	def line_check(self,string,search_term,line_number):
-		"""Takes in a string, adds it to the list of hits """
-		words = string.split()
-		if search_term in words:
-			self.hits[line_number] = string.rstrip('\n')
-
-
-
-
+	def add_to_index():
+		"""Adds a """
 
 if __name__ == '__main__':
 	try: 
 		file_name = sys.argv[1]
 	except IndexError: 
-		print "Please retry with a valid filename."
-	else:
+		print "Please enter a filename."
+	if os.path.exists(file_name):
 		search_term = raw_input("Search term:")
 		s = Scanner(file_name,search_term)
-		s.traverse_file()
+		s.naive_traversal(s.line_check)
 		s.get_results()
-
+	else:
+		print "Please enter a valid filename"
