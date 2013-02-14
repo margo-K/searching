@@ -5,7 +5,7 @@ import os
 """
 
 CLASSES: 
-	- Scanner: moves through the file, maintaining a dictionary of line numbers and lines where the word appears
+	- Scanner: 
 """
 
 class Scanner:
@@ -55,16 +55,6 @@ class Scanner:
 		else: 
 			print " '%s' does not appear in the document" %search_term
 
-
-
-
-# class InvertedIndexer:
-
-# 	def __init__(self):
-# 		self.index = {}	
-
-# 	def add_to_index():
-# 		"""Adds a """
 
 if __name__ == '__main__':
 	try: 
