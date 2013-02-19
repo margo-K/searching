@@ -17,7 +17,7 @@ default_depth = 2
 
 class BFS_Crawler:
 	"""Create an instance of Crawler with a root and its tree"""
-	def __init__(self,start = 'http://www.nytimes.com',depth = default_depth):
+	def __init__(self,start = 'http://www.racialicious.com',depth = default_depth):
 		"""Initialize the crawler with the starting urls"""
 		self.root = start
 		self.depth = depth
@@ -29,9 +29,13 @@ class BFS_Crawler:
 	def extract_links(self,url): # note: all of the links have a u''
 		"""Retrieve all html data from a webpage and return a souped object"""
 		links = []
-		data = urllib2.urlopen(url).read()
-		for link in BeautifulSoup(data).find_all('a'):
-			links.append(urljoin(url,link.get('href')))
+		try:
+			data = urllib2.urlopen(url).read()
+		except urllib2.HTTPError as e:
+			print "Could not open file: {}".format(e.errno,e.strerror)
+		else:
+			for link in BeautifulSoup(data).find_all('a'):
+				links.append(urljoin(url,link.get('href')))
 		return links
 
 	def BFS_crawl(self):
@@ -74,8 +78,32 @@ if __name__ == '__main__':
 """
 TO DO:
  - Add support for URL errors (like forbidden or broken link)
- - Add support for parent layers"""
+ - Add support for parent layers
+ - Add an index, so each page """
 
+ # HTMLParser.HTMLParseError: malformed start tag, at line 1746, column 132
+
+# /Library/Python/2.7/site-packages/bs4/builder/_htmlparser.py:149: RuntimeWarning: Python's built-in HTMLParser cannot parse the given document. This is not a bug in Beautiful Soup. The best solution is to install an external parser (lxml or html5lib), and use Beautiful Soup with that parser. See http://www.crummy.com/software/BeautifulSoup/bs4/doc/#installing-a-parser for help.
+#   "Python's built-in HTMLParser cannot parse the given document. This is not a bug in Beautiful Soup. The best solution is to install an external parser (lxml or html5lib), and use Beautiful Soup with that parser. See http://www.crummy.com/software/BeautifulSoup/bs4/doc/#installing-a-parser for help."))
+# Traceback (most recent call last):
+#   File "crawler.py", line 75, in <module>
+#     c.BFS_crawl()
+#   File "crawler.py", line 50, in BFS_crawl
+#     for link in self.extract_links(current_node): # Does not currently account for duplicate links
+#   File "crawler.py", line 37, in extract_links
+#     for link in BeautifulSoup(data).find_all('a'):
+#   File "/Library/Python/2.7/site-packages/bs4/__init__.py", line 172, in __init__
+#     self._feed()
+#   File "/Library/Python/2.7/site-packages/bs4/__init__.py", line 185, in _feed
+#     self.builder.feed(self.markup)
+#   File "/Library/Python/2.7/site-packages/bs4/builder/_htmlparser.py", line 150, in feed
+#     raise e
+# HTMLParser.HTMLParseError: bad end tag: u"</' + 'script>", at line 16, column 748
+# [2]   Exit 127                opzn
+# [4]   Done                    pos=Bar1
+# [5]-  Done                    sn2=5b35bc29/49f095e7
+# [8]+  Done                    ad=feb_hol_reg_bar1_hp_3J6LK_3J6L8
+# Margos-MacBook-Air:search margoK$ 
 
 
 
