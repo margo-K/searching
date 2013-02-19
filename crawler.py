@@ -21,8 +21,9 @@ class BFS_Crawler:
 		"""Initialize the crawler with the starting urls"""
 		self.root = start
 		self.depth = depth
-		layer_map = {}
-		# self.start = []
+		# layer_map = {}
+		self.visited = []
+		self.start = []
 		# for url in start:
 		# 	self.start.append(url)
 
@@ -41,15 +42,24 @@ class BFS_Crawler:
 	def BFS_crawl(self):
 		"""Return a list of all links self.depth away from the original"""
 		# depth = 0
+		counter = 0
 		nodes = Queue.Queue()
 		# parent_depth = 0
-		nodes.put(self.root)#enqueues the start item in the queue
+		nodes.put((self.root,0))#enqueues (start,layer)
+		self.visited.append(self.root)
+		current_depth = 0
 
-		while not nodes.empty():
-			current_node = nodes.get()
+
+		while not (nodes.empty() or current_depth > self.depth):
+			current_node, current_depth = nodes.get()
 			for link in self.extract_links(current_node): # Does not currently account for duplicate links
-				nodes.put(link)
-				print link
+				if link in self.visited:
+					pass
+				else:
+					self.visited.append(link)
+					nodes.put((link,current_depth+1))
+				print counter, link
+				counter +=1
 
 
 
@@ -77,7 +87,8 @@ if __name__ == '__main__':
 
 """
 TO DO:
- - Add support for URL errors (like forbidden or broken link)
+ - Add support for URL errors (like broken link)
+ - determine a way to append so that you don't just the same list of links over and over just because you haven't followed them yet
  - Add support for parent layers
  - Add an index, so each page """
 
@@ -104,6 +115,33 @@ TO DO:
 # [5]-  Done                    sn2=5b35bc29/49f095e7
 # [8]+  Done                    ad=feb_hol_reg_bar1_hp_3J6LK_3J6L8
 # Margos-MacBook-Air:search margoK$ 
+
+# Traceback (most recent call last):
+#   File "crawler.py", line 75, in <module>
+#     c.BFS_crawl()
+#   File "crawler.py", line 50, in BFS_crawl
+#     for link in self.extract_links(current_node): # Does not currently account for duplicate links
+#   File "crawler.py", line 33, in extract_links
+#     data = urllib2.urlopen(url).read()
+#   File "/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/urllib2.py", line 126, in urlopen
+#     return _opener.open(url, data, timeout)
+#   File "/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/urllib2.py", line 394, in open
+#     response = self._open(req, data)
+#   File "/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/urllib2.py", line 412, in _open
+#     '_open', req)
+#   File "/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/urllib2.py", line 372, in _call_chain
+#     result = func(*args)
+#   File "/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/urllib2.py", line 1199, in http_open
+#     return self.do_open(httplib.HTTPConnection, req)
+#   File "/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/urllib2.py", line 1170, in do_open
+#     r = h.getresponse(buffering=True)
+#   File "/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/httplib.py", line 1027, in getresponse
+#     response.begin()
+#   File "/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/httplib.py", line 407, in begin
+#     version, status, reason = self._read_status()
+#   File "/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/httplib.py", line 371, in _read_status
+#     raise BadStatusLine(line)
+# httplib.BadStatusLine: ''
 
 
 
