@@ -29,7 +29,9 @@ class BFS_Crawler:
 			print "Could not open file: {}".format(e.errno,e.strerror)
 		else:
 			for link in BeautifulSoup(data).find_all('a'):
-				links.append(urljoin(url,link.get('href')))
+				formatted_link = urljoin(url,link.get('href'))
+				if formatted_link.startswith('http'):
+					links.append(formatted_link)
 		return links
 
 	def BFS_crawl(self):
