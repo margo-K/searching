@@ -47,12 +47,17 @@ class HTMLFiler:
 	def file_cleanup(self):
 		"""Remove all files associated with this session of the filer
 			Current: prints a list of all files created in this session"""
-		print self.created_files
-
+		for f in self.created_files:
+			if raw_input('Are you sure you want to delete: {0}? y/n\n'.format(f)) in {'y','Y'}:
+				os.remove(f)
+				print "{} has been removed".format(f)
+			else: 
+				print '{} will be saved'.format(f)
 
 if __name__ == '__main__': 
 	H = HTMLFiler()
-	info_to_be_stored = H.html_grabber()
-	H.html_storer(info_to_be_stored)
+	# info_to_be_stored = H.html_grabber()
+	H.html_storer(H.html_grabber())
+	H.file_cleanup()
 
 
