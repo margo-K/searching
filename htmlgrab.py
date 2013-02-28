@@ -19,6 +19,7 @@ class HTMLFiler:
 			urls = DEFAULT_URLS
 
 		for url in urls:
+			print url
 			site_name = url.split('www.')[1].rstrip('.com')
 			try:
 				filish_object = urllib2.urlopen(url)
@@ -55,9 +56,13 @@ class HTMLFiler:
 				print '{} will be saved'.format(f)
 
 if __name__ == '__main__': 
+	try:
+		sites = [sys.argv[1]]
+	except IndexError:
+		sites = None
+		print "Proceeding with default sites"
 	H = HTMLFiler()
-	# info_to_be_stored = H.html_grabber()
-	H.html_storer(H.html_grabber())
+	H.html_storer(H.html_grabber(urls = sites))
 	H.file_cleanup()
 
 
