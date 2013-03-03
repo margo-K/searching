@@ -2,7 +2,7 @@ import sys
 import os
 
 
-DEFAULT_FILE = 'htmlgrab.py'
+DEFAULT_FILE = '/Users/margoK/Dropbox/search/htmlgrab.py'
 DEFAULT_SEARCH_TERMS = ['the','if']
 
 class Scanner:
@@ -38,7 +38,6 @@ class Scanner:
 			for line in f:
 				fn(text=line,position=line_number,search_term=self.search_terms)
 				line_number +=1
-		print self.hits
 
 	def hit_check(self,text=None,search_term=None,position=None):
 		"""Check text for search_term in each line & store matches"""
@@ -47,22 +46,21 @@ class Scanner:
 
 		for term in search_term:
 			if term in words_to_search:
-				self.hits[term].append((position,text))	
+				self.hits[term].append((position,text.strip()))	
 
 	def get_results(self):
 		"""Print the search results"""
 		print "\r\n------------Results--------------"
 
-		if self.hits:
-			total_hits = len(self.hits)
-			print "Search term(s): %s"%self.search_terms
-			print "\r\nTotal hits: %s"%total_hits
-			
-			for key, value in self.hits.items():
-				print "\t\tLine {0}: '{1}'".format(key,value)
-		else:
-			for term in self.search_terms: 
+		for term in self.search_terms:
+			print "Search term: %s"%term
+			print "\r\nTotal hits: %s"%len(self.hits[term])
+			if not self.hits[term]:
 				print "\n '%s' does not appear in the document." %term
+			else:
+				for hit in self.hits[term]:
+					line_number, line = hit
+					print "\t\tLine {0}: '{1}'".format(line_number,line)
 
 
 if __name__ == '__main__':
@@ -82,7 +80,7 @@ if __name__ == '__main__':
 
 	s = Scanner(search_terms)
 	s.naive_traversal(s.hit_check, file_name = file_name)
-	# s.get_results()
+	s.get_results()
 		
 
 
