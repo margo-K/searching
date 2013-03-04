@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 import Queue
 from bulbs.neo4jserver import Graph
 import time
+from indexer import PageSoup
 # import robotparser # used to check robot files
 
 DEFAULT_URLS = ['http://www.google.com','http://www.amazon.com','http://www.nytimes.com','http://www.racialicious.com','http://www.groupon.com','http://www.yelp.com']
@@ -19,20 +20,20 @@ class BFS_Crawler:
 		self.root = start
 		self.depth = depth
 		self.start = []
+		self.indexer = Indexer()
+		self.connection = MongoClient()
+		self.page_db = connection.page_db
 
-	def extract_links(self,url): 
-		"""Retrieve all html data from a webpage and return a souped object"""
+	def process_page(self,url): 
+		"""Retrieve all html data from a webpage,index it and return a list of links"""
 		links = []
 		try:
-			data = urllib2.urlopen(url).read()
-		except urllib2.HTTPError as e:
-			print "Could not open file: {}".format(e.errno,e.strerror)
+			p = Page(data)
+		except IndexerError:
+			print IndexerError
 		else:
-			for link in BeautifulSoup(data).find_all('a'):
-				formatted_link = urljoin(url,link.get('href'))
-				if formatted_link.startswith('http'):
-					links.append(formatted_link)
-		return links
+			record = p.make_record()
+			return record,p.links
 
 	def BFS_crawl(self):
 		"""Return a list of all links self.depth away from the original"""
@@ -51,12 +52,13 @@ class BFS_Crawler:
 			print "This is the current vertex:"
 			print current_vertex
 
-			for link in self.extract_links(current_url):
+			for link in self.process_page(current_url):
 				# link_vertex = self.g.vertices.get_or_create('url',link)
 				try:
 					link_vertex = self.g.vertices.index.lookup(url=link).next()
 				except AttributeError: #when the vertex is not currently in the graph
 					link_vertex = self.g.vertices.create(url=link,crawled=time.time())
+					# page_db.pages.insert(record)
 					nodes.put((link,current_depth+1))
 				
 				self.g.edges.create(current_vertex, "links to",link_vertex)
