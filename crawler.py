@@ -3,6 +3,7 @@ import Queue
 import indexer
 from pymongo import MongoClient,errors
 import pprint
+from threading import Thread
 # import robotparser # used to check robot files
 
 DEFAULT_URLS = ['http://www.google.com','http://www.amazon.com','http://www.nytimes.com','http://www.racialicious.com','http://www.groupon.com','http://www.yelp.com']
@@ -10,7 +11,7 @@ DEFAULT_DEPTH = 2
 
 class BFS_Crawler:
 	"""Create an instance of Crawler with a root and its tree"""
-	def __init__(self,start = 'http://www.google.com',depth = DEFAULT_DEPTH):
+	def __init__(self,start = 'http://www.smittenkitchen.com',depth = DEFAULT_DEPTH):
 		"""Initialize the crawler with the starting urls"""
 		self.root = start
 		self.depth = depth
@@ -48,14 +49,26 @@ class BFS_Crawler:
 
 		nodes = Queue.Queue()
 		nodes.put((self.root,0))#enqueues (start,layer)
-		ever_seen = set()
-		ever_crawled = set()
 
-		ever_seen.add(self.root)
+		self.ever_seen = set() #
+		self.ever_crawled = set()
+		self.ever_seen.add(self.root)
+
+		#insert here
+		for _ in xrange(5):
+			t = Thread(target=self.crawler_process,args=(nodes,))
+			t.daemon = True
+			t.start()
+		print "Waiting on the queue to be flushed"
+		nodes.join() #blocking
+		print "You've done it"
+						
+	def crawler_process(self,queue):
+		print "New process started"
+
 		current_depth = 0
-
-		while not (nodes.empty() or current_depth > self.depth):
-			current_url, current_depth = nodes.get()
+		while True:
+			current_url, current_depth = queue.get()
 
 			print "This is the current node and its current depth"
 			print current_url, current_depth
@@ -63,17 +76,17 @@ class BFS_Crawler:
 			page = self.process_page(current_url) # # index the page, (maybe in try-catch)
 			if page:
 				if self.update_index(page):
-					ever_crawled.add(current_url)# record-keeping
+					self.ever_crawled.add(current_url)# record-keeping
 
 					for link in page.links:
-						if link not in ever_seen:
-							nodes.put((link,current_depth+1)) # put it in the queue to be crawled
-							ever_seen.add(link)
+						if link not in self.ever_seen and current_depth <= self.depth:
+							queue.put((link,current_depth+1)) # put it in the queue to be crawled
+							self.ever_seen.add(link)
 				else:
-					ever_seen.remove(current_url)
+					self.ever_seen.remove(current_url)
+			queue.task_done()
+		print "Process finished"
 
-		print "You've done it"
-						
 
 if __name__ == '__main__':
 	c = BFS_Crawler()
