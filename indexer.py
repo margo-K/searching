@@ -33,7 +33,7 @@ class Page(BeautifulSoup):
 			self.paragraph_text = self._get_paragraph_text()
 			self.header_text = self._get_header_text()
 			self.keywords = self._get_keywords()
-			# self.crawl_time = time.time()
+			self.crawl_time = time.time()
 			self.index = {}
 			self._make_index(self.header_text+self.keywords,prominent=True)
 			self._make_index(self.paragraph_text)
@@ -57,7 +57,10 @@ class Page(BeautifulSoup):
 		keywords = []
 		tag = self.find(is_meta_keyword_tag)
 		if tag:
-			keywords+= tag.attrs['content'].split(",")
+			try:
+				keywords+= tag.attrs['content'].split(",")
+			except KeyError:
+				"Print keyword but no contents"
 		return keywords
 
 	def _make_index(self,page_text,prominent=False):
