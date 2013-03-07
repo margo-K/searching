@@ -14,3 +14,10 @@ def query(search_term,mongo_db_collection):
 		print "The search term %s does not currently appear in the index"%search_term
 	# return [page[0] for page in sorted(pages,key=lambda page: page[1])] #unsorted
 	
+def query2(search_term,mongo_db_collection):
+	"""Returns a list of Links (without formatting - for use with app)"""
+	record = mongo_db_collection.find_one(search_term)
+	if record: 
+		pages = record['pages'] # in case where _id: search_term and entry = {_id: term, pages: [(url1,score),(url2,score),etc.]}
+		links = [elem[0].encode('ascii','ignore') for elem in sorted(pages,key=lambda page: page[1],reverse=True)]
+		return links
