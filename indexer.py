@@ -34,7 +34,7 @@ class Page(BeautifulSoup):
 			self.header_text = self._get_header_text()
 			self.keywords = self._get_keywords()
 			self.crawl_time = time.time()
-			self.index = {}
+			self.index = {} 
 			self._make_index(self.header_text+self.keywords,prominent=True)
 			self._make_index(self.paragraph_text)
 
@@ -66,7 +66,7 @@ class Page(BeautifulSoup):
 	def _make_index(self,page_text,prominent=False):
 		"""Add words in page_text to the page's index"""
 		for line in page_text:
-			working_list = [elem for elem in parse_line(line) if elem  and elem not in USELESS_WORDS]
+			working_list = [elem.lower() for elem in parse_line(line) if elem  and elem not in USELESS_WORDS]
 			for item in working_list:
 				if item and item not in self.index:
 					# self.index[item] = {'url': self.url, 'prominent': prominent, 'count': 1}
