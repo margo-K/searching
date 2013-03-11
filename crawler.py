@@ -4,12 +4,10 @@ import indexer
 from pymongo import MongoClient,errors,DESCENDING,ASCENDING
 import pprint
 from threading import Thread
-from robotparser import RobotFileParser # used to check robot files
 from urlparse import urlparse,urljoin
 
 DEFAULT_URLS = ['http://www.google.com','http://www.amazon.com','http://www.nytimes.com','http://www.racialicious.com','http://www.groupon.com','http://www.yelp.com']
 DEFAULT_DEPTH = 2
-RP = RobotFileParser()
 # SIMPLE_INDEX = MongoClient().index_db.simple_index # mongo collection
 
 
@@ -38,14 +36,7 @@ class BFS_Crawler:
 		else:
 			return page_object
 
-	def robot_check(self,url):
-		"""Return true if the url is okay to visit"""
-		parsed_url = urlparse(url)
-		root = parsed_url[0] + '://' + page_url[1]
-		robots_url = urljoin(root,'/robots.txt')
-		RP.set_url(robot_url)
-		RP.read()
-		return RP.can_fetch("*",url)
+
 
 	def update_index(self,page):
 		new_entries = page.make_rlink_index() # all new entries to be added to the db

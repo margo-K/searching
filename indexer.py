@@ -4,20 +4,34 @@ from urlparse import urljoin
 import pprint
 import time
 import string
+from urlparse import urlparse,urljoin
+from robotparser import RobotFileParser # used to check robot files
+RP = RobotFileParser()
+
 # DEFAULT_URLS = ['http://www.google.com','http://www.amazon.com','http://www.nytimes.com','http://www.racialicious.com','http://www.groupon.com','http://www.yelp.com']
 
 USELESS_WORDS = ['a','an','the','in','from','to','at','on']+range(10)+list(string.letters)+list(string.punctuation)
 
 def is_meta_keyword_tag(tag):
+	"""Return true iff there is a meta keyword tag"""
 	return tag.has_key('name') and tag['name']=='keywords'
 
 def parse_line(unicode_text):
-		"""Return a list of ascii-charactered words"""
-		return [word.strip(string.punctuation) for word in unicode_text.encode('ascii','ignore').split()]
+	"""Return a list of ascii-charactered words"""
+	return [word.strip(string.punctuation) for word in unicode_text.encode('ascii','ignore').split()]
 
 def rlink(frequency,total_terms,prominent):
-		"Return the rlink(a relevancy metric) of a function"
-		return float(frequency)/total_terms + prominent
+	"Return the rlink(a relevancy metric) of a function"
+	return float(frequency)/total_terms + prominent
+
+def robot_check(url):
+	"""Return true if the url is okay to visit"""
+	parsed_url = urlparse(url)
+	root = parsed_url[0] + '://' + parsed_url[1] #parsed_url[0] = http, etc. parsed_url[1] = homepage
+	robot_url = urljoin(root,'/robots.txt')
+	RP.set_url(robot_url)
+	RP.read()
+	return RP.can_fetch("*",url)
 
 class Page(BeautifulSoup):
 
@@ -39,21 +53,25 @@ class Page(BeautifulSoup):
 			self._make_index(self.paragraph_text)
 
 	def _get_clickable_links(self):
+		"""Return a list of all http and https links from the href tags on the page"""
 		links = []
 		for link in self.find_all('a'):
 			formatted_link = urljoin(self.url,link.get('href'))
-			if formatted_link.startswith('http'):
+			if formatted_link.startswith('http') and robot_check(formatted_link):
 				links.append(formatted_link)
 		return links
 
 	def _get_paragraph_text(self):
+		"""Return a list of unicode lines from all text in the p tags on the page"""
 		return [p.get_text().strip() for p in self.find_all('p')]
 
 	def _get_header_text(self):
+		"""Return a list of unicode lines from all lines on the page with an h1...h6 tag"""
 		headers = ['h1','h2','h3','h4','h5','h6']
 		return [h.get_text().strip() for h in self.find_all(headers)]
 
 	def _get_keywords(self):
+		"""Return a list of words in they keywords meta-tag, if they exist"""
 		keywords = []
 		tag = self.find(is_meta_keyword_tag)
 		if tag:
@@ -64,7 +82,11 @@ class Page(BeautifulSoup):
 		return keywords
 
 	def _make_index(self,page_text,prominent=False):
-		"""Add words in page_text to the page's index"""
+		"""Add words in page_text to the page's index, which is a dictionary of dictionaries of the form:
+			{term_in_page:
+						{count: int,
+						 prominent: boolean, true <=> word appears in header or keywords}
+			} """
 		for line in page_text:
 			working_list = [elem.lower() for elem in parse_line(line) if elem  and elem not in USELESS_WORDS]
 			for item in working_list:
@@ -76,6 +98,7 @@ class Page(BeautifulSoup):
 					self.index[item]['count'] += 1
 
 	def make_record(self):
+		"""Return a subset of the object's dictionary filtered to only include keys that appear in fields"""
 		fields = ['url','crawl_time','paragraph_text','header_text','keywords']
 		return {key: self.__dict__[key] for key in fields}
 
