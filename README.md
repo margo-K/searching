@@ -1,29 +1,59 @@
-#WordSearch 
-This project is the beginning of a larger search engine project. Currently, the two files included in this repo just 
-a) naively search specified files for a single search term 
-b)generate HTML files from a few popular websites (i.e. something to be searched). 
+#Search Engine
 
-Many more stages and a lot more functionality to come! 
+### **rlink**: a formula for relevance
+A separate rlink value is calculated for each word on each page
 
-###Contents
-- __wordsearch.py__
-- htmlgrab.py
+**Pterm** = prominence of the term on the page (True <=> word occurs in keywords metatag or one of the headers)
+**Rterm** = number of occurences of the term on the page (in any position)
+> Output:
+***rlink(page,term) = Rterm/(Total words on the page) + Pterm**
+
+Note: 'total words on the page' = sum(word*number of occureces of word) for all non-useless words on the page
+###Contents:
+Each of the following can be run independently:
+- __test_search.py__ 
+- crawler.py:
+- indexer.py:
+*automatically indexes http:://www.nytimes.com and pretty prints the inverse index created from this page
+*output is a list of tuples of the form ('word_from_text',rlink value)
+
+Required for querying but never called alone:
+- query.py: query1 is used for terminal version, query2 is used for browser version
+
+
+
+###Requirements
+- mongodb
+- pymongo
+- lxml
+- beautifulsoup4
 
 ###Getting Started
+####Command Line Version
 #####Open REPL
 
-To search a file:
+To start the crawler:
 ```
-python wordsearch.py /path/to/file_being_searched
+python crawler.py [optional urls, separated by commas] [optional depth]
 
 ``` 
 
-To generate HTML files to be searched (from 6 popular websites) and store them in the current directory: 
+To query the current index: 
+From the command line:
+```
+python test_search.py
 
 ```
-python html_grabber.py
+>>>Insert Demo<<< (with 'Please enter a search term:')
 
-```
+####Browser Version
+
+#####Additional Contents
+- searchapp.py
+- templates/index.html
+
+#####Requirements
+- flask
 
 ###To do:
 * add multi-word search, phrase searching, case sensitivity options (with and without possible words in between)
@@ -32,3 +62,6 @@ python html_grabber.py
 * build out actual class structure in the htmlgrabber
 * related word searching
 * And lots more!
+
+
+
